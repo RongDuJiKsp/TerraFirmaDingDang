@@ -1,6 +1,6 @@
 use anyhow::anyhow;
 use std::error::Error;
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TFOperator {
     Tapping,        // 轻击
     Hammering,      // 击打
