@@ -2,20 +2,19 @@ use anyhow::anyhow;
 use std::env;
 use std::error::Error;
 use std::fs::File;
-use std::io::{Read, Seek, SeekFrom};
+use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::Path;
 use std::sync::{LazyLock, Mutex};
-
+type AnyResult<T> = Result<T, Box<dyn Error>>;
+type ReadResult<T> = AnyResult<Option<T>>;
 const SPLIT_STR: &str = "</>";
 pub struct KVScanner;
 
-type AnyResult<T> = Result<T, Box<dyn Error>>;
-type ReadResult<T> = AnyResult<Option<T>>;
 impl KVScanner {
     //KV对的存储器，存储 Record<String,String>
     //结构[block size 3Bit] [block...]
     // size块的第一个字节必须为0
-    pub fn read_as_next_block(file: &mut File) -> ReadResult<Vec<u8>> {
+    pub unsafe fn read_as_next_block(file: &mut File) -> ReadResult<Vec<u8>> {
         let mut pre = [0u8; 3]; //first headers
         let pre_size = file.read(&mut pre)?;
         let block_size = if pre_size == 0 {
@@ -38,7 +37,7 @@ impl KVScanner {
             Ok(Some(buffer))
         }
     }
-    pub fn get_kv_from_block(block: &[u8]) -> AnyResult<(String, String)> {
+    pub unsafe fn get_kv_from_block(block: &[u8]) -> AnyResult<(String, String)> {
         let str_block = String::from_utf8(block.to_vec())?;
         let mut s = str_block.split(SPLIT_STR);
         let (key, val) = (
@@ -47,7 +46,7 @@ impl KVScanner {
         );
         Ok((key, val))
     }
-    pub fn find_next_v_by_k(file: &mut File, key: &str) -> ReadResult<String> {
+    pub unsafe fn find_next_v_by_k(file: &mut File, key: &str) -> ReadResult<String> {
         //持续读块到文件尾部
         while let Some(block) = Self::read_as_next_block(file)? {
             let (k, v) = Self::get_kv_from_block(&block)?;
@@ -60,15 +59,36 @@ impl KVScanner {
     pub fn find_first_v_by_k(file: &mut File, key: &str) -> ReadResult<String> {
         //文件指向文件头
         file.seek(SeekFrom::Start(0))?;
-        Ok(Self::find_next_v_by_k(file, key)?)
+        unsafe { Ok(Self::find_next_v_by_k(file, key)?) }
     }
     pub fn find_all_v_by_k(file: &mut File, key: &str) -> AnyResult<Vec<String>> {
         file.seek(SeekFrom::Start(0))?;
         let mut vs = Vec::new();
-        while let Some(v) = Self::find_next_v_by_k(file, key)? {
-            vs.push(v)
+        unsafe {
+            while let Some(v) = Self::find_next_v_by_k(file, key)? {
+                vs.push(v)
+            }
         }
         Ok(vs)
+    }
+    pub unsafe fn append_block(file: &mut File, block: &[u8]) -> AnyResult<()> {
+        let useful = block.len() as u16;
+        if useful as usize > block.len() {
+            return Err(anyhow!("Block过大").into());
+        }
+        let pre = [0, ((useful >> 8) & 0xff) as u8, (useful & 0xff) as u8];
+        file.write_all(&pre)?;
+        file.write_all(block)?;
+        Ok(())
+    }
+    pub fn append_kv(file: &mut File, k: String, v: String) -> AnyResult<()> {
+        file.seek(SeekFrom::End(0))?;
+        unsafe {
+            Ok(Self::append_block(
+                file,
+                format!("{}{}{}", &k, SPLIT_STR, &v).as_bytes(),
+            )?)
+        }
     }
 }
 pub struct RecordSaver {
@@ -79,12 +99,14 @@ impl RecordSaver {
     pub fn un_init() -> Self {
         RecordSaver { output: None }
     }
+    //扫描文件读取首个kv
     pub fn read_kv_first(&mut self, k: &str) -> Option<String> {
         if let Some(f) = &mut self.output {
             return KVScanner::find_first_v_by_k(f, k).expect("在查找存储的数据时发生错误");
         }
         None
     }
+    //扫描文件读取所有kv
     pub fn read_kv_all(&mut self, k: &str) -> Vec<String> {
         if let Some(f) = &mut self.output {
             return KVScanner::find_all_v_by_k(f, k).expect("在查找存储的数据时发生错误");
