@@ -2,6 +2,7 @@ use clap::Parser;
 use std::sync::LazyLock;
 
 #[derive(Parser, Debug)]
+
 pub struct ApplicationArgs {
     //记录存储相关
     #[arg(
@@ -37,6 +38,22 @@ pub struct ApplicationArgs {
     "
     )]
     pub alignment_step: Option<String>,
+    #[arg(
+        short,
+        long,
+        help = "\
+    参数内容为：砧给出的最后步骤的格子，按照从左到右计算
+    例子：
+    LTSFTU  为三个格子分别为 最后一步轻击-倒数第二部镦锻-倒数第三步收缩
+    若第三个格子为空 则填写为 LTSFZ
+    填写对照表：
+    最后一步为X (Last): L         倒数第二步为X (LastSecond): S
+    倒数第三步为X (LastThird): T
+    非最后步骤为X (NotLast): N    任意步骤为X (Any): A
+    空 (None): Z
+    "
+    )]
+    pub last_steps: Option<String>,
 }
 impl ApplicationArgs {
     pub fn instance() -> &'static ApplicationArgs {
@@ -51,5 +68,21 @@ impl ApplicationArgs {
     pub fn has_all_tf_configs(&self) -> bool {
         self.alignment_step.is_some()
     }
+    pub fn load_config_or_unwrap(&self) -> String {
+        self.load_config.clone().expect("未提供加载预定义配方的key")
+    }
+    pub fn save_as_or_unwrap(&self) -> String {
+        self.save_as.clone().expect("未提供存储预定义配方的key")
+    }
+    pub fn tfc_cmd_or_unwrap(&self) -> TFCommands {
+        TFCommands {
+            alignment_step: self.alignment_step.clone().expect("未提供对齐步骤"),
+            last_steps: self.last_steps.clone().expect("未提供最后步骤"),
+        }
+    }
 }
 static APPLICATION_ARGS: LazyLock<ApplicationArgs> = LazyLock::new(|| ApplicationArgs::parse());
+pub struct TFCommands {
+    pub alignment_step: String,
+    pub last_steps: String,
+}

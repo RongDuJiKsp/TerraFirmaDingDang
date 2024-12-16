@@ -65,6 +65,19 @@ pub enum TFConditionOp {
     Any(TFOperator),        //任意步骤为X
     None,                   //空
 }
+impl Into<char> for TFConditionOp {
+    fn into(self) -> char {
+        match self {
+            TFConditionOp::Last(_) => 'L',
+            TFConditionOp::LastSecond(_) => 'S',
+            TFConditionOp::LastThird(_) => 'T',
+            TFConditionOp::NotLast(_) => 'N',
+            TFConditionOp::Any(_) => 'A',
+            TFConditionOp::None => 'Z', //Zero
+        }
+    }
+}
+
 impl TFConditionOp {
     pub fn is_none(&self) -> bool {
         if let TFConditionOp::None = self {
@@ -84,17 +97,5 @@ impl TFConditionOp {
             _ => return Err(anyhow!("No Such Char").into()),
         };
         Ok(c)
-    }
-}
-impl Into<char> for TFConditionOp {
-    fn into(self) -> char {
-        match self {
-            TFConditionOp::Last(_) => 'L',
-            TFConditionOp::LastSecond(_) => 'S',
-            TFConditionOp::LastThird(_) => 'T',
-            TFConditionOp::NotLast(_) => 'N',
-            TFConditionOp::Any(_) => 'A',
-            TFConditionOp::None => 'Z', //Zero
-        }
     }
 }
