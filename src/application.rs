@@ -12,10 +12,10 @@ pub fn init() {
     if APPLICATION_ARGS.load_config.is_some() || APPLICATION_ARGS.save_as.is_some() {
         if APPLICATION_ARGS.global {
             //读取全局配置文件
-            REC_SAVER.borrow_mut().load_user();
+            REC_SAVER.lock().unwrap().load_user();
         } else {
             //读取局部配置文件
-            REC_SAVER.borrow_mut().load_exec();
+            REC_SAVER.lock().unwrap().load_exec();
         }
     }
 }
