@@ -38,5 +38,9 @@ pub struct ApplicationArgs {
     )]
     pub alignment_step: Option<String>,
 }
-impl ApplicationArgs {}
-pub static APPLICATION_ARGS: LazyLock<ApplicationArgs> = LazyLock::new(|| ApplicationArgs::parse());
+impl ApplicationArgs {
+    pub fn instance() -> &'static ApplicationArgs {
+        &*APPLICATION_ARGS
+    }
+}
+static APPLICATION_ARGS: LazyLock<ApplicationArgs> = LazyLock::new(|| ApplicationArgs::parse());
