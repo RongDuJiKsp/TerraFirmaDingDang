@@ -30,10 +30,10 @@ pub struct ApplicationArgs {
     参数内容为：将锻造指针由初始值打造为对齐的步骤
     例子：TFUU 为从初始值进行 轻击-镦锻-收缩-收缩
     填写对照表：
-    轻击 (Tapping): T    击打 (Hammering): H
+    轻击 (Tapping): T         击打 (Hammering): H
     重击 (HeavyHammering): X  牵拉 (Drawing): D
-    冲压 (Stamping): S    弯曲 (Bending): B
-    镦锻 (Forging): F     收缩 (Upsetting): U
+    冲压 (Stamping): S        弯曲 (Bending): B
+    镦锻 (Forging): F         收缩 (Upsetting): U
     "
     )]
     pub alignment_step: Option<String>,
@@ -41,6 +41,15 @@ pub struct ApplicationArgs {
 impl ApplicationArgs {
     pub fn instance() -> &'static ApplicationArgs {
         &*APPLICATION_ARGS
+    }
+    pub fn is_configuration_conflicts(&self) -> bool {
+        self.load_config.is_some() && self.save_as.is_some()
+    }
+    pub fn should_load_storage(&self) -> bool {
+        self.load_config.is_some() || self.save_as.is_some()
+    }
+    pub fn has_all_tf_configs(&self) -> bool {
+        self.alignment_step.is_some()
     }
 }
 static APPLICATION_ARGS: LazyLock<ApplicationArgs> = LazyLock::new(|| ApplicationArgs::parse());

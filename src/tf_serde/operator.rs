@@ -1,4 +1,7 @@
-pub enum DingDangOperator {
+use anyhow::anyhow;
+use std::error::Error;
+
+pub enum TFOperator {
     Tapping,        // 轻击
     Hammering,      // 击打
     HeavyHammering, // 重击
@@ -8,44 +11,55 @@ pub enum DingDangOperator {
     Forging,        // 镦锻
     Upsetting,      // 收缩
 }
-
-impl DingDangOperator {
-    pub fn to_values(&self) -> i32 {
+impl Into<i32> for TFOperator {
+    fn into(self) -> i32 {
         match self {
-            DingDangOperator::Tapping => -3,
-            DingDangOperator::Hammering => -6,
-            DingDangOperator::Stamping => 2,
-            DingDangOperator::Bending => 7,
-            DingDangOperator::HeavyHammering => -9,
-            DingDangOperator::Drawing => -15,
-            DingDangOperator::Forging => 13,
-            DingDangOperator::Upsetting => 16,
+            TFOperator::Tapping => -3,
+            TFOperator::Hammering => -6,
+            TFOperator::Stamping => 2,
+            TFOperator::Bending => 7,
+            TFOperator::HeavyHammering => -9,
+            TFOperator::Drawing => -15,
+            TFOperator::Forging => 13,
+            TFOperator::Upsetting => 16,
         }
     }
-    pub fn to_char(&self) -> char {
+}
+impl Into<char> for TFOperator {
+    fn into(self) -> char {
         match self {
-            DingDangOperator::Tapping => 'T',
-            DingDangOperator::Hammering => 'H',
-            DingDangOperator::Stamping => 'S',
-            DingDangOperator::Bending => 'B',
-            DingDangOperator::HeavyHammering => 'X',
-            DingDangOperator::Drawing => 'D',
-            DingDangOperator::Forging => 'F',
-            DingDangOperator::Upsetting => 'U',
+            TFOperator::Tapping => 'T',
+            TFOperator::Hammering => 'H',
+            TFOperator::Stamping => 'S',
+            TFOperator::Bending => 'B',
+            TFOperator::HeavyHammering => 'X',
+            TFOperator::Drawing => 'D',
+            TFOperator::Forging => 'F',
+            TFOperator::Upsetting => 'U',
         }
     }
+}
+impl TryFrom<char> for TFOperator {
+    type Error = Box<dyn Error>;
 
-    pub fn from_char(c: char) -> Option<Self> {
-        match c {
-            'T' => Some(Self::Tapping),
-            'H' => Some(Self::Hammering),
-            'S' => Some(Self::Stamping),
-            'B' => Some(Self::Bending),
-            'X' => Some(Self::HeavyHammering),
-            'D' => Some(Self::Drawing),
-            'F' => Some(Self::Forging),
-            'U' => Some(Self::Upsetting),
-            _ => None,
+    fn try_from(value: char) -> Result<Self, Self::Error> {
+        match value {
+            'T' => Ok(TFOperator::Tapping),
+            'H' => Ok(TFOperator::Hammering),
+            'S' => Ok(TFOperator::Stamping),
+            'B' => Ok(TFOperator::Bending),
+            'X' => Ok(TFOperator::HeavyHammering),
+            'D' => Ok(TFOperator::Drawing),
+            'F' => Ok(TFOperator::Forging),
+            'U' => Ok(TFOperator::Upsetting),
+            _ => anyhow!("No Such Element").into(),
         }
     }
+}
+pub enum TFConditionOp {
+    Last(TFOperator),       //最后一步为X
+    LastSecond(TFOperator), //倒数第二步为X
+    LastThird(TFOperator),  //倒数第三步为X
+    NotLast(TFOperator),    //非最后步骤为X
+    Any(TFOperator),        //任意步骤为X
 }
