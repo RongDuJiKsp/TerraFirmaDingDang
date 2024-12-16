@@ -73,4 +73,28 @@ impl TFConditionOp {
             false
         }
     }
+    pub fn make(flag: char, op: TFOperator) -> Result<TFConditionOp, Box<dyn Error>> {
+        let c = match flag {
+            'L' => Self::Last(op),
+            'S' => Self::LastSecond(op),
+            'T' => Self::LastThird(op),
+            'N' => Self::NotLast(op),
+            'A' => Self::Any(op),
+            'Z' => Self::None,
+            _ => return Err(anyhow!("No Such Char").into()),
+        };
+        Ok(c)
+    }
+}
+impl Into<char> for TFConditionOp {
+    fn into(self) -> char {
+        match self {
+            TFConditionOp::Last(_) => 'L',
+            TFConditionOp::LastSecond(_) => 'S',
+            TFConditionOp::LastThird(_) => 'T',
+            TFConditionOp::NotLast(_) => 'N',
+            TFConditionOp::Any(_) => 'A',
+            TFConditionOp::None => 'Z', //Zero
+        }
+    }
 }
