@@ -69,15 +69,25 @@ impl ApplicationArgs {
         self.alignment_step.is_some()
     }
     pub fn load_config_or_unwrap(&self) -> String {
-        self.load_config.clone().expect("未提供加载预定义配方的key")
+        self.load_config
+            .clone()
+            .expect("未提供加载预定义配方的key --load-config")
     }
     pub fn save_as_or_unwrap(&self) -> String {
-        self.save_as.clone().expect("未提供存储预定义配方的key")
+        self.save_as
+            .clone()
+            .expect("未提供存储预定义配方的key --save-as")
     }
     pub fn tfc_cmd_or_unwrap(&self) -> TFCommands {
         TFCommands {
-            alignment_step: self.alignment_step.clone().expect("未提供对齐步骤"),
-            last_steps: self.last_steps.clone().expect("未提供最后步骤"),
+            alignment_step: self
+                .alignment_step
+                .clone()
+                .expect("未提供对齐步骤 --alignment_step"),
+            last_steps: self
+                .last_steps
+                .clone()
+                .expect("未提供最后步骤 --last_steps"),
         }
     }
 }
