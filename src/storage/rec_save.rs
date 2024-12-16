@@ -1,4 +1,5 @@
 use anyhow::anyhow;
+use std::cell::RefCell;
 use std::env;
 use std::error::Error;
 use std::fs::File;
@@ -150,4 +151,5 @@ impl RecordSaver {
         self.output.replace(file);
     }
 }
-static REC_SAVER: LazyLock<RecordSaver> = LazyLock::new(|| RecordSaver::un_init());
+pub static REC_SAVER: LazyLock<RefCell<RecordSaver>> =
+    LazyLock::new(|| RefCell::new(RecordSaver::un_init()));
