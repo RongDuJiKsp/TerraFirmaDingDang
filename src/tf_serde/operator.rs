@@ -1,6 +1,6 @@
 use anyhow::anyhow;
 use std::error::Error;
-
+#[derive(Debug, Clone)]
 pub enum TFOperator {
     Tapping,        // 轻击
     Hammering,      // 击打
@@ -52,14 +52,25 @@ impl TryFrom<char> for TFOperator {
             'D' => Ok(TFOperator::Drawing),
             'F' => Ok(TFOperator::Forging),
             'U' => Ok(TFOperator::Upsetting),
-            _ => anyhow!("No Such Element").into(),
+            _ => Err(anyhow!("No Such Element").into()),
         }
     }
 }
+#[derive(Debug, Clone)]
 pub enum TFConditionOp {
     Last(TFOperator),       //最后一步为X
     LastSecond(TFOperator), //倒数第二步为X
     LastThird(TFOperator),  //倒数第三步为X
     NotLast(TFOperator),    //非最后步骤为X
     Any(TFOperator),        //任意步骤为X
+    None,                   //空
+}
+impl TFConditionOp {
+    pub fn is_none(&self) -> bool {
+        if let TFConditionOp::None = self {
+            true
+        } else {
+            false
+        }
+    }
 }
