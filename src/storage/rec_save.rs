@@ -149,7 +149,7 @@ impl RecordSaver {
             .expect("在创建或打开配置文件时失败");
         self.output.replace(file);
     }
-    pub fn instance() -> MutexGuard<RecordSaver> {
+    pub fn instance() -> MutexGuard<'static, RecordSaver> {
         REC_SAVER.lock().unwrap()
     }
 }
