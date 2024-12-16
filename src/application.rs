@@ -1,5 +1,5 @@
 use crate::frontend::args::APPLICATION_ARGS;
-use crate::storage::rec_save::REC_SAVER;
+use crate::storage::rec_save::RecordSaver;
 
 pub fn init() {
     //check args
@@ -12,10 +12,10 @@ pub fn init() {
     if APPLICATION_ARGS.load_config.is_some() || APPLICATION_ARGS.save_as.is_some() {
         if APPLICATION_ARGS.global {
             //读取全局配置文件
-            REC_SAVER.lock().unwrap().load_user();
+            RecordSaver::instance().load_user();
         } else {
             //读取局部配置文件
-            REC_SAVER.lock().unwrap().load_exec();
+            RecordSaver::instance().load_exec();
         }
     }
 }

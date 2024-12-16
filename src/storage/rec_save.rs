@@ -4,7 +4,7 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::Path;
-use std::sync::{LazyLock, Mutex};
+use std::sync::{LazyLock, Mutex, MutexGuard};
 type AnyResult<T> = Result<T, Box<dyn Error>>;
 type ReadResult<T> = AnyResult<Option<T>>;
 const SPLIT_STR: &str = "</>";
@@ -149,6 +149,10 @@ impl RecordSaver {
             .expect("在创建或打开配置文件时失败");
         self.output.replace(file);
     }
+    pub fn instance() -> MutexGuard<RecordSaver> {
+        REC_SAVER.lock().unwrap()
+    }
 }
-pub static REC_SAVER: LazyLock<Mutex<RecordSaver>> =
+
+static REC_SAVER: LazyLock<Mutex<RecordSaver>> =
     LazyLock::new(|| Mutex::new(RecordSaver::un_init()));

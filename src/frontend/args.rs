@@ -36,6 +36,7 @@ pub struct ApplicationArgs {
     镦锻 (Forging): F     收缩 (Upsetting): U
     "
     )]
-    pub alignment_step: String,
+    pub alignment_step: Option<String>,
 }
+impl ApplicationArgs {}
 pub static APPLICATION_ARGS: LazyLock<ApplicationArgs> = LazyLock::new(|| ApplicationArgs::parse());
