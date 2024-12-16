@@ -85,12 +85,12 @@ impl KVScanner {
         file.write_all(block)?;
         Ok(())
     }
-    pub fn append_kv(file: &mut File, k: String, v: String) -> AnyResult<()> {
+    pub fn append_kv(file: &mut File, k: &str, v: &str) -> AnyResult<()> {
         file.seek(SeekFrom::End(0))?;
         unsafe {
             Ok(Self::append_block(
                 file,
-                format!("{}{}{}", &k, SPLIT_STR, &v).as_bytes(),
+                format!("{}{}{}", k, SPLIT_STR, v).as_bytes(),
             )?)
         }
     }
@@ -116,6 +116,11 @@ impl RecordSaver {
             return KVScanner::find_all_v_by_k(f, k).expect("在查找存储的数据时发生错误");
         }
         vec![]
+    }
+    pub fn append_kv(&mut self, k: &str, v: &str) {
+        if let Some(f) = &mut self.output {
+            KVScanner::append_kv(f, k, v).expect("在写入配置项数据时发生错误");
+        }
     }
 
     //在可执行文件目录加载配置
