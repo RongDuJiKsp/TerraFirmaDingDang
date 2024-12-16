@@ -150,7 +150,7 @@ impl RecordSaver {
         self.output.replace(file);
     }
     pub fn instance() -> MutexGuard<'static, RecordSaver> {
-        REC_SAVER.lock().unwrap()
+        REC_SAVER.lock().expect("对Config服务加锁时失败")
     }
 }
 
