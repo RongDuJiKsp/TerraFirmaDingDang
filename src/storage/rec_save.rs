@@ -4,7 +4,7 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::Path;
-use std::sync::{LazyLock, Mutex};
+use std::sync::LazyLock;
 type AnyResult<T> = Result<T, Box<dyn Error>>;
 type ReadResult<T> = AnyResult<Option<T>>;
 const SPLIT_STR: &str = "</>";
@@ -150,5 +150,4 @@ impl RecordSaver {
         self.output.replace(file);
     }
 }
-static REC_SAVER: LazyLock<Mutex<RecordSaver>> =
-    LazyLock::new(|| Mutex::new(RecordSaver::un_init()));
+static REC_SAVER: LazyLock<RecordSaver> = LazyLock::new(|| RecordSaver::un_init());
