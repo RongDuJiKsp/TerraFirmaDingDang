@@ -13,7 +13,8 @@ pub struct KVScanner;
 impl KVScanner {
     //KV对的存储器，存储 Record<String,String>
     //结构[block size 3Bit] [block...]
-    // size块的第一个字节必须为0
+    //size块的第一个字节必须为0
+    //Unsafe：文件指针不是由顺序读取而来会导致未定义行为
     pub unsafe fn read_as_next_block(file: &mut File) -> ReadResult<Vec<u8>> {
         let mut pre = [0u8; 3]; //first headers
         let pre_size = file.read(&mut pre)?;
@@ -37,6 +38,7 @@ impl KVScanner {
             Ok(Some(buffer))
         }
     }
+    //Unsafe：文件指针不是由顺序读取而来会导致未定义行为
     pub unsafe fn get_kv_from_block(block: &[u8]) -> AnyResult<(String, String)> {
         let str_block = String::from_utf8(block.to_vec())?;
         let mut s = str_block.split(SPLIT_STR);
@@ -46,6 +48,7 @@ impl KVScanner {
         );
         Ok((key, val))
     }
+    //Unsafe：文件指针不是由顺序读取而来会导致未定义行为
     pub unsafe fn find_next_v_by_k(file: &mut File, key: &str) -> ReadResult<String> {
         //持续读块到文件尾部
         while let Some(block) = Self::read_as_next_block(file)? {
@@ -71,6 +74,7 @@ impl KVScanner {
         }
         Ok(vs)
     }
+    //Unsafe：文件指针没有指向末尾导致未定义行为
     pub unsafe fn append_block(file: &mut File, block: &[u8]) -> AnyResult<()> {
         let useful = block.len() as u16;
         if useful as usize > block.len() {
