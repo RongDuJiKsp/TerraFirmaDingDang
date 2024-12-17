@@ -93,7 +93,7 @@ impl SearchSolver {
         SearchSolver { condition }
     }
 }
-const FAST_STEP_BY_LIM: i32 = -46; //这个参数为启发式条件--快速步进
+const FAST_STEP_BY_LIM: i32 = -62; //这个参数为启发式条件--快速步进
 fn should_continue(
     start_location: i32,
     this_search_state: &SearchState,
