@@ -1,3 +1,4 @@
+use crate::tf_serde::magic_vals::STEP_CONDITION;
 use crate::tf_serde::operator::{TFConditionOp, TFOperator};
 use crate::tf_serde::search_stack::SearchStack;
 use std::collections::{HashSet, VecDeque};
@@ -12,7 +13,7 @@ struct SearchState {
 #[derive(Hash, PartialEq, Eq)]
 struct SearchZippedState {
     sum_of: i32,
-    last_3_step: [Option<TFOperator>; 3],
+    last_step: [Option<TFOperator>; STEP_CONDITION],
     cond: [bool; 3],
 }
 impl SearchZippedState {
@@ -27,7 +28,7 @@ impl SearchZippedState {
                 .iter()
                 .map(|x| <TFOperator as Into<i32>>::into(*x))
                 .sum(),
-            last_3_step: [
+            last_step: [
                 stk.get(stk_len - 3).cloned(),
                 stk.get(stk_len - 2).cloned(),
                 stk.get(stk_len - 1).cloned(),
@@ -37,7 +38,7 @@ impl SearchZippedState {
     }
 }
 pub struct SearchSolver {
-    condition: [TFConditionOp; 3],
+    condition: [TFConditionOp; STEP_CONDITION],
 }
 impl SearchSolver {
     pub fn search_solve(
@@ -87,7 +88,7 @@ impl SearchSolver {
         }
         vec![]
     }
-    pub fn with_condition(condition: [TFConditionOp; 3]) -> SearchSolver {
+    pub fn with_condition(condition: [TFConditionOp; STEP_CONDITION]) -> SearchSolver {
         SearchSolver { condition }
     }
 }
