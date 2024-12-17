@@ -55,6 +55,7 @@ impl SearchSolver {
         SearchSolver { condition }
     }
 }
+const FAST_STEP_BY_LIM: i32 = -46; //这个参数为启发式条件--快速步进
 fn should_continue(
     start_location: i32,
     this_search_state: &SearchState,
@@ -69,5 +70,11 @@ fn should_continue(
     if start_location < 0 && next_location < start_location {
         return false; //首次操作不允许向右
     }
+    if this_search_state.location < FAST_STEP_BY_LIM
+        && <TFOperator as Into<i32>>::into(next_step) < 0
+    {
+        return false; //优化：当当前的位置小于快速步进范围(建议值为2+7+13+16=38) 时 不试图往左走
+    }
+
     true
 }
