@@ -2,6 +2,7 @@ use crate::tf_serde::operator::{TFConditionOp, TFOperator};
 use crate::tf_serde::search_stack::SearchStack;
 use std::collections::VecDeque;
 use strum::IntoEnumIterator;
+const SEARCH_RANGE: i32 = 128;
 
 #[derive(Clone)]
 struct SearchState {
@@ -25,6 +26,9 @@ impl SearchSolver {
         {
             for steps in TFOperator::iter() {
                 let next_local: i32 = now_location + <TFOperator as Into<i32>>::into(steps.clone());
+                if !(-SEARCH_RANGE <= next_local && next_local <= SEARCH_RANGE) {
+                    continue; //优化：如果超过打铁可以接受的范围，则放弃这个解
+                }
                 let mut next_stack = now_stack.clone();
                 next_stack.push(steps);
                 if next_local == 0 && next_stack.ok() {
