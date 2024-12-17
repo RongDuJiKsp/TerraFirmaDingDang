@@ -14,7 +14,7 @@ impl SearchStack {
                 TFConditionOp::Last(o) => len >= 1 && o.eq(&self.stack[len - 1]),
                 TFConditionOp::LastSecond(o) => len >= 2 && o.eq(&self.stack[len - 2]),
                 TFConditionOp::LastThird(o) => len >= 3 && o.eq(&self.stack[len - 3]),
-                TFConditionOp::NotLast(o) => len < 1 || o.ne(&self.stack[len - 1]),
+                TFConditionOp::NotLast(o) => len > 0 && o.ne(&self.stack[len - 1]),
                 TFConditionOp::Any(o) => {
                     self.condition_ok[idx] || (len >= 1 && o.eq(&self.stack[len - 1]))
                 }
