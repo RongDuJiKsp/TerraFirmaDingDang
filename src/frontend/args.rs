@@ -23,6 +23,12 @@ pub struct ApplicationArgs {
         help = "若提供这个参数，则从用户目录中读取结构文件，而不是可执行文件目录"
     )]
     pub global: bool,
+    #[arg(
+        short,
+        long,
+        help = "若提供这个参数，指读取key指向的所有结构，而不是这个key的首个结果"
+    )]
+    pub multi_key: bool,
     //TF核心
     #[arg(
         short,

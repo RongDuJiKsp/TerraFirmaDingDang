@@ -8,7 +8,7 @@ struct SearchState {
     location: i32,
     stack: SearchStack,
 }
-struct SearchSolver {
+pub struct SearchSolver {
     condition: [TFConditionOp; 3],
 }
 impl SearchSolver {
@@ -37,5 +37,8 @@ impl SearchSolver {
             }
         }
         vec![]
+    }
+    pub fn with_condition(condition: [TFConditionOp; 3]) -> SearchSolver {
+        SearchSolver { condition }
     }
 }

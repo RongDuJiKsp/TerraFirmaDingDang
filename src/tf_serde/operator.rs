@@ -3,7 +3,7 @@ use anyhow::anyhow;
 use std::error::Error;
 use strum_macros::{EnumIs, EnumIter};
 
-#[derive(Debug, Clone, PartialEq, Eq, EnumIs, EnumIter)]
+#[derive(Debug, Clone, PartialEq, Eq, EnumIs, EnumIter, Copy)]
 pub enum TFOperator {
     Tapping,        // 轻击
     Hammering,      // 击打
@@ -73,7 +73,7 @@ impl SerializedList for TFOperator {
             .collect::<Result<Vec<_>, _>>()?)
     }
 }
-#[derive(Debug, Clone, EnumIs)]
+#[derive(Debug, Clone, EnumIs, Copy)]
 pub enum TFConditionOp {
     Last(TFOperator),       //最后一步为X
     LastSecond(TFOperator), //倒数第二步为X
