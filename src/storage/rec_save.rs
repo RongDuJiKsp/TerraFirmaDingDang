@@ -39,8 +39,7 @@ impl KVScanner {
             Ok(Some(buffer))
         }
     }
-    //Unsafe：文件指针不是由顺序读取而来会导致未定义行为
-    pub unsafe fn get_kv_from_block(block: &[u8]) -> AnyResult<(String, String)> {
+    pub fn get_kv_from_block(block: &[u8]) -> AnyResult<(String, String)> {
         let str_block = String::from_utf8(block.to_vec())?;
         let mut s = str_block.split(SPLIT_STR);
         let (key, val) = (
