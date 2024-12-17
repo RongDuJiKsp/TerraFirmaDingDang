@@ -85,7 +85,12 @@ fn calc_exec() {
         println!("{}", TFOperator::marshal(&save_this_steps));
         println!("{}", TFOperator::marshal(&make_new_steps));
     } else {
-        println!("挽救对齐工件的步骤：");
+        println!(
+            "挽救对齐工件(成功率：{}%)的步骤：",
+            (make_new_steps.len() as f64 * 100.0
+                / (save_this_steps.len() as f64 + start.len() as f64))
+                .floor()
+        );
         display_ops(&save_this_steps, &mut io::stdout()).expect("打印结果时失败");
         println!("从头开始的步骤：");
         display_ops(&make_new_steps, &mut io::stdout()).expect("打印结果时失败");
