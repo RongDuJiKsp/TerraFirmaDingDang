@@ -45,4 +45,10 @@ impl SearchStack {
     pub fn inner(self) -> Vec<TFOperator> {
         self.stack
     }
+    pub fn borrow_inner(&self) -> &Vec<TFOperator> {
+        &self.stack
+    }
+    pub fn conditions(&self) -> &[bool; 3] {
+        &self.condition_ok
+    }
 }

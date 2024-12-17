@@ -1,13 +1,40 @@
 use crate::tf_serde::operator::{TFConditionOp, TFOperator};
 use crate::tf_serde::search_stack::SearchStack;
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 use strum::IntoEnumIterator;
-pub const SEARCH_RANGE: i32 = 128;
 
 #[derive(Clone)]
 struct SearchState {
     location: i32,
     stack: SearchStack,
+}
+//一个基本的状态摘要
+#[derive(Hash, PartialEq, Eq)]
+struct SearchZippedState {
+    sum_of: i32,
+    last_3_step: [Option<TFOperator>; 3],
+    cond: [bool; 3],
+}
+impl SearchZippedState {
+    //对状态进行摘要
+    //显然两个状态等效当且仅当最后几个取摘要的相同且cond状态相同
+    //理论上是小于等于3个 但是取多一个影响不大
+    fn from_state(value: &SearchState) -> Self {
+        let stk = value.stack.borrow_inner();
+        let stk_len = stk.len();
+        Self {
+            sum_of: stk
+                .iter()
+                .map(|x| <TFOperator as Into<i32>>::into(*x))
+                .sum(),
+            last_3_step: [
+                stk.get(stk_len - 3).cloned(),
+                stk.get(stk_len - 2).cloned(),
+                stk.get(stk_len - 1).cloned(),
+            ],
+            cond: value.stack.conditions().clone(),
+        }
+    }
 }
 pub struct SearchSolver {
     condition: [TFConditionOp; 3],
@@ -20,10 +47,13 @@ impl SearchSolver {
         right_limit: i32,
     ) -> Vec<TFOperator> {
         let mut bfs_que = VecDeque::new();
-        bfs_que.push_back(SearchState {
+        let mut vised = HashSet::new();
+        let init_state = SearchState {
             location: start_location,
             stack: SearchStack::new(self.condition.clone()),
-        });
+        };
+        vised.insert(SearchZippedState::from_state(&init_state));
+        bfs_que.push_back(init_state);
         while let Some(this_state) = bfs_que.pop_front() {
             for steps in TFOperator::iter() {
                 let next_local: i32 =
@@ -40,13 +70,19 @@ impl SearchSolver {
                 }
                 let mut next_stack = this_state.stack.clone();
                 next_stack.push(steps);
-                if next_local == 0 && next_stack.ok() {
-                    return next_stack.inner();
-                }
-                bfs_que.push_back(SearchState {
+                let next_state = SearchState {
                     location: next_local,
                     stack: next_stack,
-                })
+                };
+                let next_state_zipped = SearchZippedState::from_state(&next_state);
+                if next_state.location == 0 && next_state.stack.ok() {
+                    return next_state.stack.inner();
+                }
+                if vised.contains(&next_state_zipped) {
+                    continue;
+                }
+                vised.insert(next_state_zipped);
+                bfs_que.push_back(next_state);
             }
         }
         vec![]
