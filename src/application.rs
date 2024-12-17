@@ -67,9 +67,8 @@ fn load_config_exec(key: &str) {
 fn calc_exec() {
     //解析条件
     let cmd = ApplicationArgs::instance().tfc_cmd_or_unwrap();
-    let start = TFOperator::unmarshal(&cmd.last_steps).expect("在反序列化起始步骤时失败");
-    let condition =
-        TFConditionOp::unmarshal(&cmd.alignment_step).expect("在反序列化约束步骤时失败");
+    let start = TFOperator::unmarshal(&cmd.alignment_step).expect("在反序列化起始步骤时失败");
+    let condition = TFConditionOp::unmarshal(&cmd.last_steps).expect("在反序列化约束步骤时失败");
     //创建求解器
     let solver = SearchSolver::with_condition([condition[0], condition[1], condition[2]]);
     //将已经对齐的铁打完
