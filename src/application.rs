@@ -1,8 +1,10 @@
 use crate::alogrithm::search::SearchSolver;
 use crate::frontend::args::ApplicationArgs;
+use crate::frontend::display_operator::display_ops;
 use crate::storage::rec_save::RecordSaver;
 use crate::tf_serde::operator::{TFConditionOp, TFOperator};
 use crate::tf_serde::stringify::SerializedList;
+use std::io;
 
 pub fn init() {
     //check args
@@ -24,24 +26,45 @@ pub fn init() {
 }
 pub fn run() {
     if let Some(key) = &ApplicationArgs::instance().load_config {
-        let make_new_stems_list = (if ApplicationArgs::instance().multi_key {
-            RecordSaver::instance()
-                .read_kv_all(key.as_str())
-                .iter()
-                .map(|x| TFOperator::unmarshal(x))
-                .collect::<Result<Vec<_>, _>>()
-        } else {
-            let mut list = vec![];
-            if let Some(e) = RecordSaver::instance().read_kv_first(key) {
-                list.push(e);
-            }
-            list.iter()
-                .map(|x| TFOperator::unmarshal(x))
-                .collect::<Result<Vec<_>, _>>()
-        })
-        .expect("生成的转储文件已经损坏，请删除后重新启动");
-        return;
+        load_config_exec(key);
+    } else {
+        calc_exec();
     }
+}
+fn load_config_exec(key: &str) {
+    let make_new_stems_list = (if ApplicationArgs::instance().multi_key {
+        RecordSaver::instance()
+            .read_kv_all(key)
+            .iter()
+            .map(|x| TFOperator::unmarshal(x))
+            .collect::<Result<Vec<_>, _>>()
+    } else {
+        let mut list = vec![];
+        if let Some(e) = RecordSaver::instance().read_kv_first(key) {
+            list.push(e);
+        }
+        list.iter()
+            .map(|x| TFOperator::unmarshal(x))
+            .collect::<Result<Vec<_>, _>>()
+    })
+    .expect("生成的转储文件已经损坏，请删除后重新启动");
+    if !ApplicationArgs::instance().pipe {
+        println!(
+            "针对key：{} 查找到{}个相关结果",
+            key,
+            make_new_stems_list.len()
+        )
+    }
+    for (idx, l) in make_new_stems_list.into_iter().enumerate() {
+        if ApplicationArgs::instance().pipe {
+            println!("{}", TFOperator::marshal(&l));
+        } else {
+            println!("第{}个结果为：", idx);
+            display_ops(&l, &mut io::stdout()).expect("打印结果时失败");
+        }
+    }
+}
+fn calc_exec() {
     //解析条件
     let cmd = ApplicationArgs::instance().tfc_cmd_or_unwrap();
     let start = TFOperator::unmarshal(&cmd.last_steps).expect("在反序列化起始步骤时失败");
@@ -58,4 +81,16 @@ pub fn run() {
             .map(|x| <TFOperator as Into<i32>>::into(*x))
             .sum::<i32>(),
     );
+    if ApplicationArgs::instance().pipe {
+        println!("{}", TFOperator::marshal(&save_this_steps));
+        println!("{}", TFOperator::marshal(&make_new_steps));
+    } else {
+        println!("挽救对齐工件的步骤：");
+        display_ops(&save_this_steps, &mut io::stdout()).expect("打印结果时失败");
+        println!("从头开始的步骤：");
+        display_ops(&make_new_steps, &mut io::stdout()).expect("打印结果时失败");
+    }
+    if let Some(key) = &ApplicationArgs::instance().save_as {
+        RecordSaver::instance().append_kv(key, &TFOperator::marshal(&make_new_steps))
+    }
 }

@@ -14,6 +14,20 @@ pub enum TFOperator {
     Forging,        // 镦锻
     Upsetting,      // 收缩
 }
+impl TFOperator {
+    pub fn chinese(self) -> &'static str {
+        match self {
+            TFOperator::Tapping => "轻击",
+            TFOperator::Hammering => "击打",
+            TFOperator::HeavyHammering => "重击",
+            TFOperator::Drawing => "牵拉",
+            TFOperator::Stamping => "冲压",
+            TFOperator::Bending => "弯曲",
+            TFOperator::Forging => "镦锻",
+            TFOperator::Upsetting => "收缩",
+        }
+    }
+}
 impl Into<i32> for TFOperator {
     fn into(self) -> i32 {
         match self {

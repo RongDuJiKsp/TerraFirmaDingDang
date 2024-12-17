@@ -29,6 +29,12 @@ pub struct ApplicationArgs {
         help = "若提供这个参数，指读取key指向的所有结构，而不是这个key的首个结果"
     )]
     pub multi_key: bool,
+    #[arg(
+        short,
+        long,
+        help = "若提供这个参数，则不输出提示性文字，而是与输入序列相同的格式的字符串"
+    )]
+    pub pipe: bool,
     //TF核心
     #[arg(
         short,
@@ -61,6 +67,7 @@ pub struct ApplicationArgs {
     )]
     pub last_steps: Option<String>,
 }
+#[allow(dead_code)]
 impl ApplicationArgs {
     pub fn instance() -> &'static ApplicationArgs {
         &*APPLICATION_ARGS
