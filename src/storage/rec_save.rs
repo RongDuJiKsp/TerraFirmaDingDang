@@ -24,7 +24,7 @@ impl KVScanner {
         } else if pre_size < 3 || pre[0] != 0u8 {
             return Err(anyhow::anyhow!("文件已损坏：文件头损坏").into());
         } else {
-            (pre[1] as usize) << 8 + (pre[0] as usize)
+            ((pre[1] as usize) << 8) + (pre[2] as usize)
         };
         let mut buffer = vec![0u8; block_size];
         let read_size = file.read(&mut buffer)?;
