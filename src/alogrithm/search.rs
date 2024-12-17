@@ -24,7 +24,7 @@ impl SearchSolver {
         }) = bfs_que.pop_front()
         {
             for steps in TFOperator::iter() {
-                let next_local: i32 = now_location + steps.clone().into();
+                let next_local: i32 = now_location + <TFOperator as Into<i32>>::into(steps.clone());
                 let mut next_stack = now_stack.clone();
                 next_stack.push(steps);
                 if next_local == 0 && next_stack.ok() {

@@ -52,5 +52,10 @@ pub fn run() {
     //将已经对齐的铁打完
     let save_this_steps = solver.search_solve(0);
     //将没有锻造的铁打完
-    let make_new_steps = solver.search_solve(-start.iter().map(|x| x.into()).sum::<i32>());
+    let make_new_steps = solver.search_solve(
+        -start
+            .iter()
+            .map(|x| <TFOperator as Into<i32>>::into(*x))
+            .sum::<i32>(),
+    );
 }
