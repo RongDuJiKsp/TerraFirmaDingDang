@@ -111,10 +111,33 @@ impl TFConditionOp {
         };
         Ok(c)
     }
+    pub fn operator_of(self) -> Option<TFOperator> {
+        let e = match self {
+            TFConditionOp::Last(o) => o,
+            TFConditionOp::LastSecond(o) => o,
+            TFConditionOp::LastThird(o) => o,
+            TFConditionOp::NotLast(o) => o,
+            TFConditionOp::Any(o) => o,
+            TFConditionOp::None => return None,
+        };
+        Some(e)
+    }
 }
 impl SerializedList for TFConditionOp {
     fn marshal(v: &Vec<Self>) -> String {
-        todo!()
+        v.iter()
+            .map(|e| {
+                if let Some(o) = e.clone().operator_of() {
+                    format!(
+                        "{}{}",
+                        <TFConditionOp as Into<char>>::into(e.clone()),
+                        <TFOperator as Into<char>>::into(o)
+                    )
+                } else {
+                    format!("{}", <TFConditionOp as Into<char>>::into(e.clone()))
+                }
+            })
+            .collect()
     }
 
     fn unmarshal(string: &str) -> Result<Vec<Self>, Box<dyn Error>> {
