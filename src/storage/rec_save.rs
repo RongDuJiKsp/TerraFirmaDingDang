@@ -9,6 +9,7 @@ type AnyResult<T> = Result<T, Box<dyn Error>>;
 type ReadResult<T> = AnyResult<Option<T>>;
 const SPLIT_STR: &str = "</>";
 const STORAGE_NAME: &str = "TerraFirmaDingDang.db";
+const HEADER_SIZE: usize = 3;
 pub struct KVScanner;
 
 impl KVScanner {
@@ -17,11 +18,11 @@ impl KVScanner {
     //size块的第一个字节必须为0
     //Unsafe：文件指针不是由顺序读取而来会导致未定义行为
     pub unsafe fn read_as_next_block(file: &mut File) -> ReadResult<Vec<u8>> {
-        let mut pre = [0u8; 3]; //first headers
+        let mut pre = [0u8; HEADER_SIZE]; //first headers
         let pre_size = file.read(&mut pre)?;
         let block_size = if pre_size == 0 {
             return Ok(None);
-        } else if pre_size < 3 || pre[0] != 0u8 {
+        } else if pre_size < HEADER_SIZE || pre[0] != 0u8 {
             return Err(anyhow::anyhow!("文件已损坏：文件头损坏").into());
         } else {
             ((pre[1] as usize) << 8) + (pre[2] as usize)
@@ -80,7 +81,7 @@ impl KVScanner {
         if useful as usize > block.len() {
             return Err(anyhow!("Block过大").into());
         }
-        let pre = [0, ((useful >> 8) & 0xff) as u8, (useful & 0xff) as u8];
+        let pre: [u8; HEADER_SIZE] = [0, ((useful >> 8) & 0xff) as u8, (useful & 0xff) as u8];
         file.write_all(&pre)?;
         file.write_all(block)?;
         Ok(())
