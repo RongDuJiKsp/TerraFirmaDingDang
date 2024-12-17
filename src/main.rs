@@ -1,3 +1,4 @@
+mod alogrithm;
 mod application;
 mod frontend;
 mod storage;

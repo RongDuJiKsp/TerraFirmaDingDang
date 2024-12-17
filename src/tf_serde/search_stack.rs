@@ -25,4 +25,11 @@ impl SearchStack {
     pub fn ok(&self) -> bool {
         self.condition_ok[0] && self.condition_ok[1] && self.condition_ok[2]
     }
+    pub fn new(cond: [TFConditionOp; 3]) -> SearchStack {
+        SearchStack {
+            stack: Vec::new(),
+            conditions: cond,
+            condition_ok: [false; 3],
+        }
+    }
 }

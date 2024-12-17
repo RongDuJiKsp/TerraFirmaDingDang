@@ -1,9 +1,9 @@
 use crate::tf_serde::stringify::SerializedList;
 use anyhow::anyhow;
 use std::error::Error;
-use strum_macros::EnumIs;
+use strum_macros::{EnumIs, EnumIter};
 
-#[derive(Debug, Clone, PartialEq, Eq, EnumIs)]
+#[derive(Debug, Clone, PartialEq, Eq, EnumIs, EnumIter)]
 pub enum TFOperator {
     Tapping,        // 轻击
     Hammering,      // 击打
