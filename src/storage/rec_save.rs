@@ -8,6 +8,7 @@ use std::sync::{LazyLock, Mutex, MutexGuard};
 type AnyResult<T> = Result<T, Box<dyn Error>>;
 type ReadResult<T> = AnyResult<Option<T>>;
 const SPLIT_STR: &str = "</>";
+const STORAGE_NAME: &str = "TerraFirmaDingDang.db";
 pub struct KVScanner;
 
 impl KVScanner {
@@ -124,7 +125,7 @@ impl RecordSaver {
     }
 
     //在可执行文件目录加载配置
-    pub fn load_user(&mut self) {
+    pub fn load_exec(&mut self) {
         self.open_or_init(
             &env::current_exe()
                 .expect("解析可执行文件路径时失败")
@@ -133,7 +134,7 @@ impl RecordSaver {
         )
     }
     //在用户目录加载配置
-    pub fn load_exec(&mut self) {
+    pub fn load_user(&mut self) {
         self.open_or_init(
             #[allow(deprecated)]
             &env::home_dir().expect("解析用户目录时发生错误。请不要在Cygwin等环境下执行"),
@@ -145,7 +146,7 @@ impl RecordSaver {
             .read(true)
             .write(true)
             .create(true)
-            .open(path)
+            .open(path.join(STORAGE_NAME))
             .expect("在创建或打开配置文件时失败");
         self.output.replace(file);
     }
