@@ -32,4 +32,7 @@ impl SearchStack {
             condition_ok: [false; 3],
         }
     }
+    pub fn inner(self) -> Vec<TFOperator> {
+        self.stack
+    }
 }
