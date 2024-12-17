@@ -18,7 +18,7 @@ pub struct ApplicationArgs {
     )]
     pub load_config: Option<String>,
     #[arg(
-        short,
+        short = 'c',
         long,
         help = "若提供这个参数，则从用户目录中读取结构文件，而不是可执行文件目录"
     )]
