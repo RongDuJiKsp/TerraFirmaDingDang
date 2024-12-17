@@ -14,7 +14,7 @@ struct SearchState {
 struct SearchZippedState {
     sum_of: i32,
     last_step: [Option<TFOperator>; STEP_CONDITION],
-    cond: [bool; 3],
+    cond: [bool; STEP_CONDITION],
 }
 impl SearchZippedState {
     //对状态进行摘要
@@ -28,11 +28,12 @@ impl SearchZippedState {
                 .iter()
                 .map(|x| <TFOperator as Into<i32>>::into(*x))
                 .sum(),
-            last_step: [
-                stk.get(stk_len - 3).cloned(),
-                stk.get(stk_len - 2).cloned(),
-                stk.get(stk_len - 1).cloned(),
-            ],
+            last_step: (1..=STEP_CONDITION)
+                .rev()
+                .map(|x| stk.get(stk_len - x).cloned())
+                .collect::<Vec<_>>()
+                .try_into()
+                .expect("对状态进行摘要时发生错误，请联系管理员"),
             cond: value.stack.conditions().clone(),
         }
     }

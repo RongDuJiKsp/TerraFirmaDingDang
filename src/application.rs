@@ -71,7 +71,7 @@ fn calc_exec() {
     let start = TFOperator::unmarshal(&cmd.alignment_step).expect("在反序列化起始步骤时失败");
     let condition = TFConditionOp::unmarshal(&cmd.last_steps).expect("在反序列化约束步骤时失败");
     //创建求解器
-    let solver = SearchSolver::with_condition([condition[0], condition[1], condition[2]]);
+    let solver = SearchSolver::with_condition(condition.try_into().expect("约束的长度不正确"));
     let zero_lim = start
         .iter()
         .map(|x| <TFOperator as Into<i32>>::into(*x))
