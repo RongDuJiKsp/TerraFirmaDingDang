@@ -2,7 +2,7 @@ use crate::tf_serde::operator::{TFConditionOp, TFOperator};
 use crate::tf_serde::search_stack::SearchStack;
 use std::collections::VecDeque;
 use strum::IntoEnumIterator;
-const SEARCH_RANGE: i32 = 128;
+pub const SEARCH_RANGE: i32 = 128;
 
 #[derive(Clone)]
 struct SearchState {
@@ -13,7 +13,12 @@ pub struct SearchSolver {
     condition: [TFConditionOp; 3],
 }
 impl SearchSolver {
-    pub fn search_solve(&self, start_location: i32) -> Vec<TFOperator> {
+    pub fn search_solve(
+        &self,
+        start_location: i32,
+        left_limit: i32,
+        right_limit: i32,
+    ) -> Vec<TFOperator> {
         let mut bfs_que = VecDeque::new();
         bfs_que.push_back(SearchState {
             location: start_location,
@@ -26,8 +31,11 @@ impl SearchSolver {
         {
             for steps in TFOperator::iter() {
                 let next_local: i32 = now_location + <TFOperator as Into<i32>>::into(steps.clone());
-                if !(-SEARCH_RANGE <= next_local && next_local <= SEARCH_RANGE) {
+                if !(left_limit <= next_local && next_local <= right_limit) {
                     continue; //优化：如果超过打铁可以接受的范围，则放弃这个解
+                }
+                if start_location < 0 && next_local < start_location {
+                    continue; //首次操作不允许向右
                 }
                 let mut next_stack = now_stack.clone();
                 next_stack.push(steps);

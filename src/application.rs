@@ -1,4 +1,4 @@
-use crate::alogrithm::search::SearchSolver;
+use crate::alogrithm::search::{SearchSolver, SEARCH_RANGE};
 use crate::frontend::args::ApplicationArgs;
 use crate::frontend::display_operator::display_ops;
 use crate::storage::rec_save::RecordSaver;
@@ -71,15 +71,14 @@ fn calc_exec() {
     let condition = TFConditionOp::unmarshal(&cmd.last_steps).expect("在反序列化约束步骤时失败");
     //创建求解器
     let solver = SearchSolver::with_condition([condition[0], condition[1], condition[2]]);
+    let zero_lim = start
+        .iter()
+        .map(|x| <TFOperator as Into<i32>>::into(*x))
+        .sum::<i32>();
     //将已经对齐的铁打完
-    let save_this_steps = solver.search_solve(0);
+    let save_this_steps = solver.search_solve(0, -zero_lim, SEARCH_RANGE);
     //将没有锻造的铁打完
-    let make_new_steps = solver.search_solve(
-        -start
-            .iter()
-            .map(|x| <TFOperator as Into<i32>>::into(*x))
-            .sum::<i32>(),
-    );
+    let make_new_steps = solver.search_solve(-zero_lim, -zero_lim, SEARCH_RANGE);
     if ApplicationArgs::instance().pipe {
         println!("{}", TFOperator::marshal(&save_this_steps));
         println!("{}", TFOperator::marshal(&make_new_steps));
