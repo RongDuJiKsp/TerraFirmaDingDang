@@ -12,13 +12,13 @@ pub struct ApplicationArgs {
     )]
     pub save_as: Option<String>,
     #[arg(
-        short,
+        short = 'c',
         long,
         help = "若提供这个参数，则从文件中以这个key读取结构，同时忽略后面给出的具体参数"
     )]
     pub load_config: Option<String>,
     #[arg(
-        short = 'c',
+        short,
         long,
         help = "若提供这个参数，则从用户目录中读取结构文件，而不是可执行文件目录"
     )]
