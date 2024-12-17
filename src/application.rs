@@ -1,7 +1,8 @@
-use crate::alogrithm::search::{SearchSolver, SEARCH_RANGE};
+use crate::alogrithm::search::SearchSolver;
 use crate::frontend::args::ApplicationArgs;
 use crate::frontend::display_operator::display_ops;
 use crate::storage::rec_save::RecordSaver;
+use crate::tf_serde::magic_vals::TICKS_RANGE;
 use crate::tf_serde::operator::{TFConditionOp, TFOperator};
 use crate::tf_serde::stringify::SerializedList;
 use std::io;
@@ -76,9 +77,10 @@ fn calc_exec() {
         .map(|x| <TFOperator as Into<i32>>::into(*x))
         .sum::<i32>();
     //将已经对齐的铁打完
-    let save_this_steps = solver.search_solve(0, -zero_lim, SEARCH_RANGE);
+    //记zero_lim为0刻度，则最👉刻度为刻度长度
+    let save_this_steps = solver.search_solve(0, -zero_lim, TICKS_RANGE - zero_lim);
     //将没有锻造的铁打完
-    let make_new_steps = solver.search_solve(-zero_lim, -zero_lim, SEARCH_RANGE);
+    let make_new_steps = solver.search_solve(-zero_lim, -zero_lim, TICKS_RANGE - zero_lim);
     if ApplicationArgs::instance().pipe {
         println!("{}", TFOperator::marshal(&save_this_steps));
         println!("{}", TFOperator::marshal(&make_new_steps));
