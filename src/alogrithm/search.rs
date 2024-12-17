@@ -24,20 +24,21 @@ impl SearchSolver {
             location: start_location,
             stack: SearchStack::new(self.condition.clone()),
         });
-        while let Some(SearchState {
-            location: now_location,
-            stack: now_stack,
-        }) = bfs_que.pop_front()
-        {
+        while let Some(this_state) = bfs_que.pop_front() {
             for steps in TFOperator::iter() {
-                let next_local: i32 = now_location + <TFOperator as Into<i32>>::into(steps.clone());
-                if !(left_limit <= next_local && next_local <= right_limit) {
-                    continue; //优化：如果超过打铁可以接受的范围，则放弃这个解
+                let next_local: i32 =
+                    this_state.location + <TFOperator as Into<i32>>::into(steps.clone());
+                if !should_continue(
+                    start_location,
+                    &this_state,
+                    steps,
+                    next_local,
+                    left_limit,
+                    right_limit,
+                ) {
+                    continue;
                 }
-                if start_location < 0 && next_local < start_location {
-                    continue; //首次操作不允许向右
-                }
-                let mut next_stack = now_stack.clone();
+                let mut next_stack = this_state.stack.clone();
                 next_stack.push(steps);
                 if next_local == 0 && next_stack.ok() {
                     return next_stack.inner();
@@ -53,4 +54,20 @@ impl SearchSolver {
     pub fn with_condition(condition: [TFConditionOp; 3]) -> SearchSolver {
         SearchSolver { condition }
     }
+}
+fn should_continue(
+    start_location: i32,
+    this_search_state: &SearchState,
+    next_step: TFOperator,
+    next_location: i32,
+    left_lim: i32,
+    right_lim: i32,
+) -> bool {
+    if !(left_lim <= next_location && next_location <= right_lim) {
+        return false; //优化：如果超过打铁可以接受的范围，则放弃这个解
+    }
+    if start_location < 0 && next_location < start_location {
+        return false; //首次操作不允许向右
+    }
+    true
 }
