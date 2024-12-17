@@ -1,6 +1,9 @@
+use crate::tf_serde::stringify::SerializedList;
 use anyhow::anyhow;
 use std::error::Error;
-#[derive(Debug, Clone, PartialEq, Eq)]
+use strum_macros::EnumIs;
+
+#[derive(Debug, Clone, PartialEq, Eq, EnumIs)]
 pub enum TFOperator {
     Tapping,        // 轻击
     Hammering,      // 击打
@@ -56,7 +59,21 @@ impl TryFrom<char> for TFOperator {
         }
     }
 }
-#[derive(Debug, Clone)]
+impl SerializedList for TFOperator {
+    fn marshal(v: &Vec<Self>) -> String {
+        v.iter()
+            .map(|x| <TFOperator as Into<char>>::into(x.clone()))
+            .collect::<String>()
+    }
+
+    fn unmarshal(string: &str) -> Result<Vec<Self>, Box<dyn Error>> {
+        Ok(string
+            .chars()
+            .map(|x| TFOperator::try_from(x))
+            .collect::<Result<Vec<_>, _>>()?)
+    }
+}
+#[derive(Debug, Clone, EnumIs)]
 pub enum TFConditionOp {
     Last(TFOperator),       //最后一步为X
     LastSecond(TFOperator), //倒数第二步为X
@@ -79,12 +96,8 @@ impl Into<char> for TFConditionOp {
 }
 
 impl TFConditionOp {
-    pub fn is_none(&self) -> bool {
-        if let TFConditionOp::None = self {
-            true
-        } else {
-            false
-        }
+    pub fn flag_is_none(flag: char) -> bool {
+        flag == 'Z'
     }
     pub fn make(flag: char, op: TFOperator) -> Result<TFConditionOp, Box<dyn Error>> {
         let c = match flag {
@@ -97,5 +110,29 @@ impl TFConditionOp {
             _ => return Err(anyhow!("No Such Char").into()),
         };
         Ok(c)
+    }
+}
+impl SerializedList for TFConditionOp {
+    fn marshal(v: &Vec<Self>) -> String {
+        todo!()
+    }
+
+    fn unmarshal(string: &str) -> Result<Vec<Self>, Box<dyn Error>> {
+        let mut ptr = string.chars();
+        let mut res = Vec::new();
+        while let Some(cmd) = ptr.next() {
+            if TFConditionOp::flag_is_none(cmd) {
+                res.push(TFConditionOp::None);
+                continue;
+            }
+            res.push(TFConditionOp::make(
+                cmd,
+                TFOperator::try_from(
+                    ptr.next()
+                        .ok_or(anyhow!("序列化失败：Expect char,find EOF"))?,
+                )?,
+            )?);
+        }
+        Ok(res)
     }
 }
