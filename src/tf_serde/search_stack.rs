@@ -19,7 +19,7 @@ impl SearchStack {
                     len > 0
                         && o.ne(&self.stack[len - 1])
                         && len >= size
-                        && &&self.stack[len - size..len - 1]
+                        && self.stack[len - size..len - 1]
                             .iter()
                             .filter(|x| o.eq(*x))
                             .count()
